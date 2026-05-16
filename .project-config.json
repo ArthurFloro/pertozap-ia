@@ -1,0 +1,35 @@
+{
+  "build_command": "pnpm run build",
+  "capabilities": [],
+  "dev_command": "pnpm run dev",
+  "env_vars": {},
+  "experiments": null,
+  "git_remote": {
+    "repo_url": "s3://vida-prod-gitrepo/webdev-git/310519663643726990/BUbK5RQgwnbYbZG8mkYPah",
+    "access_key_id": "ASIAZV3A2ECZBSVIXPMJ",
+    "secret_access_key": "00atPvNXj8H6dsyWQGxc8w4NY2rWHkycmCDa80Sz",
+    "session_token": "IQoJb3JpZ2luX2VjEMr//////////wEaCXVzLWVhc3QtMSJHMEUCIQDqZbA4eDNaKiJJ/zAsJc6NLIn+FWk9nEDNAV2/ObwPFQIgA/0BwB2V1aqiVJo9r3gIKHVi5x1mqQabo1oa3sidQDUq/wMIkv//////////ARAEGgw2NjUzODYwOTg4NjYiDB3kqMBd5uYBeLK8LSrTAx9F8M6TQRzEoP3qkQ3yv6lweGZCwScqpkGSjibMtpSzmyYelFLDoCl2xSuSMaz8SrqG58oorqWyaZdzirlxqYqihCOG7mvwJ0n+I0ReB9IN2uXgoJPCtcVWvHWKvGHAryDMHXhl4j5dF+PzZO4x0P1Q0y3/qZ/pYmV2804Y1grllhhbGIKHtGtI+Xhiz55sL8F/vNS/hyx547g8arNYR5vtojmYWEc+SaWUVjZEksGYLgWgLFoLZAVlhgT2gj1y5p9OAW64/pdPzRZP3TWyu7EaNf3oo/PZGSKPJRnAzADQRo+3NkyveD1ebaK6a+7FNfRZiVG4UVYGo1dwFposrbLhQBPRx2CqqrvGzQsL6lyV2GiwO4vQvFC1DG3/pSFBBg80WvYRa0GFl6qkHPIP4fwQkYyKXkiVQB9bX5FD5kUgMXmPjoCXCzXyOrDH8SWq9oMVkgDrTL0qqrvTEZiEnV3iyN2Hvq/KIXr8Cu3RTek9/wZ3ofxUXW24+KItHzVH2YJJi9yMWbS2U13gRwdS21bjPZYUA6b/vlEL0DENalRHVQmOCEzh4wOf5+2ftv24hXy8onsXeI9WF2NxZClBoflfqmy+lCZj9FULFjyd7AUdaoUGMMLOotAGOp0Bj4w0AGwQ1WQCeHKjwqRixsfM6+b4Z4HOjIYaMvKgzTPm29SuhpbzHxhK7mczvoisVonzx1eDwdK0JNQ7658Jxs0Bo+OcTlHbi7rizxD54V5N+YhdBJlyNaQ0Q2R/JobZ5pK+1scv4ZLk0Ab9TuyLeMbvTioMGAkeark5AzzWuMt2UwDE9H54ngVMJpNhDTKadAQ03qb7SFoJwZw8Kg==",
+    "expiration": "2026-05-17T05:20:02.000Z"
+  },
+  "name": "pertozap-ia",
+  "path": "/home/ubuntu/pertozap-ia",
+  "port": 3000,
+  "secrets": {
+    "BUILT_IN_FORGE_API_KEY": "4iXfbzTsyaxvENX3wK8bBx",
+    "BUILT_IN_FORGE_API_URL": "https://forge.manus.ai",
+    "JWT_SECRET": "heQUZQ9hoWdG6fof8udXbj",
+    "OAUTH_SERVER_URL": "https://api.manus.im",
+    "OWNER_NAME": "Arthur Floro",
+    "OWNER_OPEN_ID": "dP2K5dRpuSqw3oRS6cbYVZ",
+    "VITE_ANALYTICS_ENDPOINT": "https://manus-analytics.com",
+    "VITE_ANALYTICS_WEBSITE_ID": "5960e0ea-e8df-408e-9e18-4cf7c6e442e2",
+    "VITE_APP_ID": "BUbK5RQgwnbYbZG8mkYPah",
+    "VITE_APP_LOGO": "",
+    "VITE_APP_TITLE": "PertoZap IA",
+    "VITE_FRONTEND_FORGE_API_KEY": "SdtmiN49odJFzzABoauHgh",
+    "VITE_FRONTEND_FORGE_API_URL": "https://forge.manus.ai",
+    "VITE_OAUTH_PORTAL_URL": "https://manus.im"
+  },
+  "template_id": "web-static",
+  "test_command": "pnpm test"
+}
