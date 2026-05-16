@@ -8,9 +8,9 @@ interface GeolocationState {
   permissionDenied: boolean;
 }
 
-// Default: Vila Esperança center
-const DEFAULT_LAT = -23.525;
-const DEFAULT_LNG = -46.555;
+// Default: Vila Esperança center (used for distance calculation when no GPS)
+export const DEFAULT_LAT = -23.525;
+export const DEFAULT_LNG = -46.555;
 
 export function useGeolocation() {
   const [state, setState] = useState<GeolocationState>({
@@ -24,8 +24,8 @@ export function useGeolocation() {
   const requestLocation = useCallback(() => {
     if (!navigator.geolocation) {
       setState({
-        lat: DEFAULT_LAT,
-        lng: DEFAULT_LNG,
+        lat: null,
+        lng: null,
         error: "Geolocalização não suportada",
         loading: false,
         permissionDenied: false,
@@ -46,15 +46,15 @@ export function useGeolocation() {
         });
       },
       (err) => {
-        const permissionDenied = err.code === err.PERMISSION_DENIED;
+        const denied = err.code === err.PERMISSION_DENIED;
         setState({
-          lat: DEFAULT_LAT,
-          lng: DEFAULT_LNG,
-          error: permissionDenied
-            ? "Permissão negada. Usando localização padrão."
+          lat: null,
+          lng: null,
+          error: denied
+            ? "Permissão negada."
             : "Não foi possível obter localização.",
           loading: false,
-          permissionDenied,
+          permissionDenied: denied,
         });
       },
       { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 }

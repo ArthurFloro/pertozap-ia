@@ -1,3 +1,9 @@
+// ============================================================
+// MOEDA DO BAIRRO — Dados e tipos do sistema
+// Design: Saldo promocional com cashback condicionado via QR Code
+// Paridade: 100 moedas = R$ 1,00
+// ============================================================
+
 export interface Business {
   id: string;
   name: string;
@@ -8,26 +14,83 @@ export interface Business {
   hours: string;
   description: string;
   offer: string;
-  cashbackRate: number; // moedas por R$1 gasto
+  cashbackRate: number; // moedas por R$1 gasto (5-15)
   whatsapp: string;
   image: string;
   tags: string[];
+  verified: boolean;
+  joinedAt: string; // ISO date
+}
+
+export interface Transaction {
+  id: string;
+  type: "acumulo" | "resgate" | "bonus" | "expiracao";
+  clientId: string;
+  merchantId: string;
+  merchantName: string;
+  amount: number; // valor em reais da compra
+  coins: number; // moedas creditadas ou debitadas
+  status: "pendente" | "confirmada" | "cancelada" | "expirada";
+  confirmedByClient: boolean;
+  confirmedByMerchant: boolean;
+  createdAt: string;
+  confirmedAt?: string;
+  qrCodeId?: string;
+  paymentMethod?: "dinheiro" | "pix" | "cartao" | "moedas";
+}
+
+export interface QRCodeData {
+  id: string;
+  type: "acumulo" | "resgate";
+  merchantId: string;
+  merchantName: string;
+  amount?: number; // valor da compra (acúmulo) ou moedas (resgate)
+  coinsToEarn?: number;
+  coinsToRedeem?: number;
+  expiresAt: string;
+  status: "ativo" | "usado" | "expirado";
+  createdAt: string;
 }
 
 export interface UserWallet {
   balance: number;
   totalEarned: number;
+  totalRedeemed: number;
   level: "novo" | "frequente" | "fiel" | "embaixador";
   badges: string[];
   weeklyPurchases: number;
   distinctStores: number;
+  lastActivity: string;
 }
 
+export interface MerchantWallet {
+  totalCoinsDistributed: number;
+  totalCoinsRedeemed: number;
+  pendingRepayment: number; // valor em reais a receber por moedas resgatadas
+  totalSales: number;
+  transactionsToday: number;
+}
+
+// Regras de negócio
+export const RULES = {
+  COINS_PER_REAL: 100, // 100 moedas = R$ 1,00
+  MAX_COINS_PER_TRANSACTION: 500, // R$ 5,00
+  MAX_COINS_PER_DAY_CLIENT: 1000, // R$ 10,00
+  MAX_REDEEM_PERCENT: 50, // máximo 50% do valor da compra
+  MAX_REDEEM_PER_DAY: 2000, // R$ 20,00
+  COOLDOWN_MINUTES: 30,
+  MAX_TRANSACTIONS_PER_DAY: 5,
+  QR_EXPIRY_MINUTES: 5,
+  COINS_EXPIRY_DAYS: 90,
+  MIN_CASHBACK_RATE: 5,
+  MAX_CASHBACK_RATE: 15,
+};
+
 export const levels = {
-  novo: { label: "Novo Vizinho", min: 0, max: 499, rate: 10, color: "#94A3B8" },
-  frequente: { label: "Vizinho Frequente", min: 500, max: 1999, rate: 12, color: "#F59E0B" },
-  fiel: { label: "Vizinho Fiel", min: 2000, max: 4999, rate: 15, color: "#10B981" },
-  embaixador: { label: "Embaixador do Bairro", min: 5000, max: Infinity, rate: 20, color: "#8B5CF6" },
+  novo: { label: "Novo Vizinho", min: 0, max: 499, bonus: 0, color: "#94A3B8" },
+  frequente: { label: "Vizinho Frequente", min: 500, max: 1999, bonus: 10, color: "#F59E0B" },
+  fiel: { label: "Vizinho Fiel", min: 2000, max: 4999, bonus: 15, color: "#10B981" },
+  embaixador: { label: "Embaixador do Bairro", min: 5000, max: Infinity, bonus: 20, color: "#8B5CF6" },
 };
 
 export const badges = [
@@ -37,6 +100,7 @@ export const badges = [
   { id: "solidario", label: "Vizinho Solidário", icon: "🤝", description: "Indicou 3 pessoas", unlocked: false },
   { id: "fidelidade", label: "Fidelidade", icon: "⭐", description: "30 dias consecutivos", unlocked: false },
   { id: "economista", label: "Economista", icon: "💰", description: "Resgatou 500 moedas", unlocked: true },
+  { id: "qrmaster", label: "QR Master", icon: "📱", description: "20 transações via QR Code", unlocked: false },
 ];
 
 export const weeklyChallenge = {
@@ -56,6 +120,14 @@ export const categories = [
   { id: "comercio", label: "Comércio", icon: "🛍️" },
 ];
 
+export const neighborhoods = [
+  "Vila Esperança",
+  "Jardim Popular",
+  "Vila Matilde",
+  "Penha",
+  "Vila Ré",
+];
+
 // Vila Esperança area center: -23.525, -46.555
 export const businesses: Business[] = [
   {
@@ -72,6 +144,8 @@ export const businesses: Business[] = [
     whatsapp: "5511999990011",
     image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=300&fit=crop",
     tags: ["café", "pães", "bolo"],
+    verified: true,
+    joinedAt: "2025-01-15",
   },
   {
     id: "mercado-bom-vizinho",
@@ -87,6 +161,8 @@ export const businesses: Business[] = [
     whatsapp: "5511999990022",
     image: "https://images.unsplash.com/photo-1604719312566-8912e9227c6a?w=400&h=300&fit=crop",
     tags: ["mercado", "frutas", "cesta básica"],
+    verified: true,
+    joinedAt: "2025-02-01",
   },
   {
     id: "bella-flor-cabelos",
@@ -102,6 +178,8 @@ export const businesses: Business[] = [
     whatsapp: "5511999990033",
     image: "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=400&h=300&fit=crop",
     tags: ["cabelo", "hidratação", "escova"],
+    verified: true,
+    joinedAt: "2025-02-10",
   },
   {
     id: "pet-amigo",
@@ -117,6 +195,8 @@ export const businesses: Business[] = [
     whatsapp: "5511999990044",
     image: "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=400&h=300&fit=crop",
     tags: ["pet", "banho", "ração"],
+    verified: true,
+    joinedAt: "2025-03-01",
   },
   {
     id: "papelaria-criativa",
@@ -132,6 +212,8 @@ export const businesses: Business[] = [
     whatsapp: "5511999990055",
     image: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=400&h=300&fit=crop",
     tags: ["impressão", "papelaria", "xerox"],
+    verified: true,
+    joinedAt: "2025-03-15",
   },
   {
     id: "marmitaria-dona-lucia",
@@ -147,6 +229,8 @@ export const businesses: Business[] = [
     whatsapp: "5511999990066",
     image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop",
     tags: ["marmita", "almoço", "comida caseira"],
+    verified: true,
+    joinedAt: "2025-04-01",
   },
   {
     id: "oficina-rapida",
@@ -162,6 +246,8 @@ export const businesses: Business[] = [
     whatsapp: "5511999990077",
     image: "https://images.unsplash.com/photo-1487754180451-c456f719a1fc?w=400&h=300&fit=crop",
     tags: ["mecânica", "freios", "revisão"],
+    verified: true,
+    joinedAt: "2025-04-10",
   },
   {
     id: "hortifruti-da-praca",
@@ -177,6 +263,8 @@ export const businesses: Business[] = [
     whatsapp: "5511999990088",
     image: "https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=400&h=300&fit=crop",
     tags: ["frutas", "verduras", "hortifruti"],
+    verified: true,
+    joinedAt: "2025-04-20",
   },
   {
     id: "sapataria-sao-jorge",
@@ -192,6 +280,8 @@ export const businesses: Business[] = [
     whatsapp: "5511999990099",
     image: "https://images.unsplash.com/photo-1449505278894-297fdb3edbc1?w=400&h=300&fit=crop",
     tags: ["sapato", "conserto", "couro"],
+    verified: true,
+    joinedAt: "2025-05-01",
   },
   {
     id: "loja-mimo-casa",
@@ -207,17 +297,90 @@ export const businesses: Business[] = [
     whatsapp: "5511999990100",
     image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=300&fit=crop",
     tags: ["presente", "decoração", "casa"],
+    verified: true,
+    joinedAt: "2025-05-10",
   },
 ];
 
-export const neighborhoods = [
-  "Vila Esperança",
-  "Jardim Popular",
-  "Vila Matilde",
-  "Penha",
-  "Vila Ré",
+// Transações mock para demonstração
+export const mockTransactions: Transaction[] = [
+  {
+    id: "tx-001",
+    type: "acumulo",
+    clientId: "client-1",
+    merchantId: "padaria-sol-nascente",
+    merchantName: "Padaria Sol Nascente",
+    amount: 25.0,
+    coins: 250,
+    status: "confirmada",
+    confirmedByClient: true,
+    confirmedByMerchant: true,
+    createdAt: "2025-05-16T08:30:00Z",
+    confirmedAt: "2025-05-16T08:31:00Z",
+    paymentMethod: "dinheiro",
+  },
+  {
+    id: "tx-002",
+    type: "resgate",
+    clientId: "client-1",
+    merchantId: "mercado-bom-vizinho",
+    merchantName: "Mercado Bom Vizinho",
+    amount: 80.0,
+    coins: 200,
+    status: "confirmada",
+    confirmedByClient: true,
+    confirmedByMerchant: true,
+    createdAt: "2025-05-15T14:20:00Z",
+    confirmedAt: "2025-05-15T14:21:00Z",
+    paymentMethod: "moedas",
+  },
+  {
+    id: "tx-003",
+    type: "acumulo",
+    clientId: "client-1",
+    merchantId: "bella-flor-cabelos",
+    merchantName: "Bella Flor Cabelos",
+    amount: 49.0,
+    coins: 588,
+    status: "confirmada",
+    confirmedByClient: true,
+    confirmedByMerchant: true,
+    createdAt: "2025-05-14T10:00:00Z",
+    confirmedAt: "2025-05-14T10:01:00Z",
+    paymentMethod: "pix",
+  },
+  {
+    id: "tx-004",
+    type: "bonus",
+    clientId: "client-1",
+    merchantId: "sistema",
+    merchantName: "Desafio Semanal",
+    amount: 0,
+    coins: 50,
+    status: "confirmada",
+    confirmedByClient: true,
+    confirmedByMerchant: true,
+    createdAt: "2025-05-13T12:00:00Z",
+    confirmedAt: "2025-05-13T12:00:00Z",
+  },
+  {
+    id: "tx-005",
+    type: "acumulo",
+    clientId: "client-1",
+    merchantId: "marmitaria-dona-lucia",
+    merchantName: "Marmitaria Dona Lúcia",
+    amount: 18.0,
+    coins: 180,
+    status: "confirmada",
+    confirmedByClient: true,
+    confirmedByMerchant: true,
+    createdAt: "2025-05-12T12:30:00Z",
+    confirmedAt: "2025-05-12T12:31:00Z",
+    paymentMethod: "dinheiro",
+  },
 ];
 
+// Utility functions
 export function getDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371;
   const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -235,6 +398,22 @@ export function formatDistance(km: number): string {
   return `${km.toFixed(1)} km`;
 }
 
-export function calculateCoins(amount: number, level: keyof typeof levels): number {
-  return Math.floor(amount * levels[level].rate);
+export function calculateCoins(amount: number, rate: number, level: keyof typeof levels): number {
+  const baseCoins = Math.floor(amount * rate);
+  const bonusPercent = levels[level].bonus;
+  const bonus = Math.floor(baseCoins * bonusPercent / 100);
+  return Math.min(baseCoins + bonus, RULES.MAX_COINS_PER_TRANSACTION);
+}
+
+export function generateQRId(): string {
+  return `qr-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+export function isWithinCooldown(lastTransactionTime: string): boolean {
+  const diff = Date.now() - new Date(lastTransactionTime).getTime();
+  return diff < RULES.COOLDOWN_MINUTES * 60 * 1000;
+}
+
+export function formatCoinsToReais(coins: number): string {
+  return `R$ ${(coins / RULES.COINS_PER_REAL).toFixed(2)}`;
 }

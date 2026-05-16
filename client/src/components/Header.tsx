@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Coins, Store, Menu, X, Wallet } from "lucide-react";
+import { Coins, Store, Menu, X, Wallet, QrCode } from "lucide-react";
 import { useState } from "react";
 import { useWallet } from "@/contexts/WalletContext";
 
@@ -21,7 +21,7 @@ export default function Header() {
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-4">
+        <nav className="hidden md:flex items-center gap-3">
           <Link
             href="/negocios"
             className={`text-sm font-medium transition-colors hover:text-primary ${location === "/negocios" ? "text-primary" : "text-muted-foreground"}`}
@@ -36,11 +36,18 @@ export default function Header() {
             {wallet.balance} moedas
           </Link>
           <Link
+            href="/comerciante"
+            className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${location === "/comerciante" ? "bg-[#F59E0B]/15 text-[#D97706]" : "bg-muted text-foreground hover:bg-muted/80"}`}
+          >
+            <QrCode className="w-4 h-4" />
+            Painel
+          </Link>
+          <Link
             href="/cadastro"
             className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-accent text-accent-foreground text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.97]"
           >
             <Store className="w-4 h-4" />
-            Sou comerciante
+            Cadastrar
           </Link>
         </nav>
 
@@ -81,11 +88,18 @@ export default function Header() {
             Minha Carteira
           </Link>
           <Link
-            href="/cadastro"
-            className="block py-2 text-sm font-medium text-accent"
+            href="/comerciante"
+            className="block py-2 text-sm font-medium text-[#D97706]"
             onClick={() => setMenuOpen(false)}
           >
-            Sou comerciante
+            Painel do Comerciante
+          </Link>
+          <Link
+            href="/cadastro"
+            className="block py-2 text-sm font-medium text-muted-foreground"
+            onClick={() => setMenuOpen(false)}
+          >
+            Cadastrar comércio
           </Link>
         </nav>
       )}

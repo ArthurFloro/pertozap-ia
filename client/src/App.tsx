@@ -10,6 +10,7 @@ import Negocios from "./pages/Negocios";
 import NegocioDetalhe from "./pages/NegocioDetalhe";
 import Cadastro from "./pages/Cadastro";
 import Carteira from "./pages/Carteira";
+import Comerciante from "./pages/Comerciante";
 
 function Router() {
   return (
@@ -19,6 +20,7 @@ function Router() {
       <Route path="/negocios/:id" component={NegocioDetalhe} />
       <Route path="/cadastro" component={Cadastro} />
       <Route path="/carteira" component={Carteira} />
+      <Route path="/comerciante" component={Comerciante} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

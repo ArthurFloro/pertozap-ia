@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Store, Coins, CheckCircle2, Sparkles, Shield } from "lucide-react";
+import { Store, Coins, CheckCircle2, Sparkles, Shield, QrCode, ArrowRight } from "lucide-react";
+import { useLocation } from "wouter";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { categories } from "@/data/businesses";
@@ -13,6 +14,7 @@ const cashbackOptions = [
 ];
 
 export default function Cadastro() {
+  const [, navigate] = useLocation();
   const [form, setForm] = useState({
     name: "",
     category: "",
@@ -102,7 +104,7 @@ export default function Cadastro() {
               <p className="text-sm font-semibold text-foreground">Próximos passos:</p>
               <ul className="mt-2 space-y-1.5 text-sm text-muted-foreground">
                 <li>✓ Divulgue para seus clientes</li>
-                <li>✓ Use o código de 4 dígitos para confirmar transações</li>
+                <li>✓ Gere QR Codes para cada venda no Painel</li>
                 <li>✓ Acompanhe seus clientes fiéis pelo painel</li>
               </ul>
             </div>
@@ -267,7 +269,7 @@ export default function Cadastro() {
             <Shield className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
             <div className="text-xs text-muted-foreground space-y-1">
               <p className="font-medium text-foreground">Como funciona para o comerciante:</p>
-              <p>Cada transação é confirmada com código de 4 dígitos que você gera. Limite de 500 moedas/dia por cliente. Cooldown de 30 min entre transações no mesmo comércio.</p>
+              <p>Você gera um QR Code para cada venda. O cliente escaneia e confirma — confirmação bilateral, segura e sem necessidade de nota fiscal ou maquininha. Limite de 1000 moedas/dia por cliente. Cooldown de 30 min entre transações no mesmo comércio.</p>
             </div>
           </div>
 
