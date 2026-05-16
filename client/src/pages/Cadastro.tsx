@@ -1,128 +1,111 @@
 import { useState } from "react";
-import { Sparkles, Store, CheckCircle2, MessageCircle, MapPin, Clock, Tag } from "lucide-react";
+import { Store, Coins, CheckCircle2, Sparkles, Shield } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { categories, aiSuggestions } from "@/data/businesses";
+import { categories } from "@/data/businesses";
 import { toast } from "sonner";
 
-interface FormData {
-  name: string;
-  category: string;
-  neighborhood: string;
-  whatsapp: string;
-  hours: string;
-  description: string;
-  offer: string;
-}
+const cashbackOptions = [
+  { rate: 8, label: "8 moedas/R$1", description: "Conservador" },
+  { rate: 10, label: "10 moedas/R$1", description: "Padrão" },
+  { rate: 12, label: "12 moedas/R$1", description: "Agressivo" },
+  { rate: 15, label: "15 moedas/R$1", description: "Premium" },
+];
 
 export default function Cadastro() {
-  const [form, setForm] = useState<FormData>({
+  const [form, setForm] = useState({
     name: "",
     category: "",
     neighborhood: "",
     whatsapp: "",
-    hours: "",
     description: "",
     offer: "",
+    cashbackRate: 10,
   });
   const [submitted, setSubmitted] = useState(false);
-  const [aiLoading, setAiLoading] = useState(false);
+  const [generating, setGenerating] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (field: string, value: string | number) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleAiSuggest = () => {
-    if (!form.category) {
-      toast.error("Selecione uma categoria primeiro para a IA sugerir.");
+  const handleAISuggestion = () => {
+    if (!form.name || !form.category) {
+      toast.error("Preencha o nome e a categoria primeiro.");
       return;
     }
-    setAiLoading(true);
-    // Simulate AI delay
+    setGenerating(true);
     setTimeout(() => {
-      const suggestion = aiSuggestions[form.category];
-      if (suggestion) {
-        setForm((prev) => ({
-          ...prev,
-          description: prev.description || suggestion.description,
-          offer: prev.offer || suggestion.offer,
-        }));
-        toast.success("IA gerou sugestões para você!");
-      }
-      setAiLoading(false);
+      const suggestions: Record<string, { desc: string; offer: string }> = {
+        alimentacao: {
+          desc: `${form.name} é referência no bairro em comida de qualidade. Ingredientes frescos, preparo artesanal e atendimento que faz você se sentir em casa.`,
+          offer: "Combo do dia com bebida grátis",
+        },
+        mercado: {
+          desc: `No ${form.name} você encontra tudo para o dia a dia com preço justo. Frutas frescas, produtos de limpeza e aquele atendimento de vizinho.`,
+          offer: "Cesta com 5 itens essenciais por R$ 29,90",
+        },
+        beleza: {
+          desc: `${form.name} cuida da sua autoestima com profissionais qualificados e produtos de primeira linha. Agende pelo WhatsApp!`,
+          offer: "Primeiro serviço com 20% de desconto",
+        },
+        pet: {
+          desc: `Seu pet merece o melhor! ${form.name} oferece banho, tosa e produtos premium com muito carinho e cuidado.`,
+          offer: "Banho + tosa com 15% off na primeira visita",
+        },
+        servicos: {
+          desc: `${form.name} resolve seu problema com rapidez e qualidade. Profissionais experientes e orçamento sem compromisso.`,
+          offer: "Orçamento grátis + 10% off no primeiro serviço",
+        },
+        comercio: {
+          desc: `${form.name} tem os melhores produtos para você e sua casa. Variedade, qualidade e preço que cabe no bolso.`,
+          offer: "Compre 2 e leve 3 em itens selecionados",
+        },
+      };
+      const suggestion = suggestions[form.category] || suggestions.comercio;
+      setForm((prev) => ({
+        ...prev,
+        description: suggestion.desc,
+        offer: suggestion.offer,
+      }));
+      setGenerating(false);
+      toast.success("Sugestão gerada com IA!");
     }, 1200);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name || !form.category || !form.whatsapp || !form.neighborhood || !form.hours) {
-      toast.error("Preencha todos os campos obrigatórios.");
+    if (!form.name || !form.category || !form.whatsapp) {
+      toast.error("Preencha os campos obrigatórios.");
       return;
     }
     setSubmitted(true);
-    toast.success("Vitrine cadastrada com sucesso!");
+    toast.success("Cadastro enviado com sucesso!");
   };
 
   if (submitted) {
-    const category = categories.find((c) => c.id === form.category);
     return (
       <div className="min-h-screen flex flex-col">
         <Header />
-        <div className="container py-12 flex-1">
-          <div className="max-w-2xl mx-auto text-center">
-            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-              <CheckCircle2 className="w-8 h-8 text-primary" />
+        <div className="flex-1 flex items-center justify-center py-16">
+          <div className="text-center max-w-md px-4">
+            <div className="w-16 h-16 rounded-full bg-[#10B981]/10 flex items-center justify-center mx-auto mb-4">
+              <CheckCircle2 className="w-8 h-8 text-[#10B981]" />
             </div>
-            <h1 className="font-[var(--font-display)] text-2xl md:text-3xl font-bold text-foreground">
-              Sua vitrine está pronta!
-            </h1>
-            <p className="mt-2 text-muted-foreground">
-              Parabéns! Seu comércio já aparece para moradores do bairro.
+            <h2 className="font-[var(--font-display)] text-2xl font-bold text-foreground">
+              Bem-vindo à Moeda do Bairro!
+            </h2>
+            <p className="text-muted-foreground mt-3">
+              Seu comércio <strong>{form.name}</strong> foi cadastrado com cashback de <strong>{form.cashbackRate} moedas/R$1</strong>. Em breve seus clientes poderão ganhar moedas comprando com você.
             </p>
-
-            {/* Preview card */}
-            <div className="mt-8 max-w-sm mx-auto bg-card rounded-xl border border-border overflow-hidden shadow-md text-left">
-              <div className="h-36 bg-gradient-to-br from-primary/20 to-[#EAB308]/20 flex items-center justify-center">
-                <Store className="w-12 h-12 text-primary/50" />
-              </div>
-              <div className="p-4 space-y-3">
-                <div>
-                  <span className="text-xs font-medium text-muted-foreground">
-                    {category?.icon} {category?.label}
-                  </span>
-                  <h3 className="font-[var(--font-display)] font-semibold text-base text-foreground mt-1">
-                    {form.name}
-                  </h3>
-                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                    {form.description}
-                  </p>
-                </div>
-                <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <MapPin className="w-3 h-3" />
-                    {form.neighborhood}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
-                    {form.hours}
-                  </span>
-                </div>
-                {form.offer && (
-                  <div className="flex items-center gap-1.5 px-3 py-2 bg-[#EAB308]/10 rounded-lg">
-                    <Tag className="w-3 h-3 text-[#EAB308]" />
-                    <span className="text-xs font-semibold text-[#1C1917]">{form.offer}</span>
-                  </div>
-                )}
-                <div className="flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-[#25D366] text-white text-sm font-semibold">
-                  <MessageCircle className="w-4 h-4" />
-                  Chamar no WhatsApp
-                </div>
-              </div>
+            <div className="mt-6 p-4 rounded-xl bg-[#F59E0B]/10 border border-[#F59E0B]/20 text-left">
+              <p className="text-sm font-semibold text-foreground">Próximos passos:</p>
+              <ul className="mt-2 space-y-1.5 text-sm text-muted-foreground">
+                <li>✓ Divulgue para seus clientes</li>
+                <li>✓ Use o código de 4 dígitos para confirmar transações</li>
+                <li>✓ Acompanhe seus clientes fiéis pelo painel</li>
+              </ul>
             </div>
-
-            <p className="mt-6 text-sm text-muted-foreground">
-              Os moradores do bairro <strong>{form.neighborhood}</strong> já podem encontrar você.
-            </p>
           </div>
         </div>
         <Footer />
@@ -134,164 +117,168 @@ export default function Cadastro() {
     <div className="min-h-screen flex flex-col">
       <Header />
 
-      <div className="container py-10 flex-1">
-        <div className="max-w-xl mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="font-[var(--font-display)] text-2xl md:text-3xl font-bold text-foreground">
-              Cadastre seu comércio grátis
-            </h1>
-            <p className="mt-2 text-muted-foreground">
-              Em menos de 2 minutos, sua vitrine estará pronta para o bairro.
+      <div className="container py-8 max-w-2xl mx-auto">
+        <div className="text-center mb-8">
+          <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center mx-auto mb-4">
+            <Store className="w-7 h-7 text-accent" />
+          </div>
+          <h1 className="font-[var(--font-display)] text-2xl md:text-3xl font-bold text-foreground">
+            Cadastre seu comércio
+          </h1>
+          <p className="text-muted-foreground mt-2">
+            Ofereça cashback em moedas e fidelize seus clientes sem custo.
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Name */}
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1.5">
+              Nome do comércio *
+            </label>
+            <input
+              type="text"
+              value={form.name}
+              onChange={(e) => handleChange("name", e.target.value)}
+              placeholder="Ex: Padaria Sol Nascente"
+              className="w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+            />
+          </div>
+
+          {/* Category */}
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1.5">
+              Categoria *
+            </label>
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+              {categories.map((cat) => (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => handleChange("category", cat.id)}
+                  className={`flex flex-col items-center gap-1 p-3 rounded-xl border text-center transition-all ${
+                    form.category === cat.id
+                      ? "border-primary bg-primary/5 ring-2 ring-primary/30"
+                      : "border-border bg-card hover:border-primary/50"
+                  }`}
+                >
+                  <span className="text-xl">{cat.icon}</span>
+                  <span className="text-xs font-medium">{cat.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Neighborhood + WhatsApp */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">Bairro</label>
+              <input
+                type="text"
+                value={form.neighborhood}
+                onChange={(e) => handleChange("neighborhood", e.target.value)}
+                placeholder="Ex: Vila Esperança"
+                className="w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">WhatsApp *</label>
+              <input
+                type="tel"
+                value={form.whatsapp}
+                onChange={(e) => handleChange("whatsapp", e.target.value)}
+                placeholder="(11) 99999-0000"
+                className="w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+              />
+            </div>
+          </div>
+
+          {/* Cashback rate */}
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1.5 flex items-center gap-2">
+              <Coins className="w-4 h-4 text-[#F59E0B]" />
+              Taxa de cashback que você oferece
+            </label>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {cashbackOptions.map((opt) => (
+                <button
+                  key={opt.rate}
+                  type="button"
+                  onClick={() => handleChange("cashbackRate", opt.rate)}
+                  className={`p-3 rounded-xl border text-center transition-all ${
+                    form.cashbackRate === opt.rate
+                      ? "border-[#F59E0B] bg-[#F59E0B]/5 ring-2 ring-[#F59E0B]/30"
+                      : "border-border bg-card hover:border-[#F59E0B]/50"
+                  }`}
+                >
+                  <p className="text-sm font-bold text-foreground">{opt.label}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{opt.description}</p>
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Com {form.cashbackRate} moedas/R$1, uma compra de R$ 50 dá {form.cashbackRate * 50} moedas ao cliente (= R$ {((form.cashbackRate * 50) / 100).toFixed(2)} em desconto futuro).
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Name */}
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">
-                Nome do comércio *
-              </label>
-              <input
-                type="text"
-                name="name"
-                value={form.name}
-                onChange={handleChange}
-                placeholder="Ex: Padaria Sol Nascente"
-                className="w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                required
-              />
+          {/* AI suggestion */}
+          <div className="flex items-center gap-3 p-4 rounded-xl bg-muted/50 border border-border">
+            <Sparkles className="w-5 h-5 text-[#F59E0B] flex-shrink-0" />
+            <div className="flex-1">
+              <p className="text-sm font-medium text-foreground">Gerar descrição e oferta com IA</p>
+              <p className="text-xs text-muted-foreground">Preencha nome e categoria primeiro.</p>
             </div>
-
-            {/* Category */}
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">
-                Categoria *
-              </label>
-              <select
-                name="category"
-                value={form.category}
-                onChange={handleChange}
-                className="w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                required
-              >
-                <option value="">Selecione uma categoria</option>
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.icon} {cat.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Neighborhood */}
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">
-                Bairro *
-              </label>
-              <input
-                type="text"
-                name="neighborhood"
-                value={form.neighborhood}
-                onChange={handleChange}
-                placeholder="Ex: Vila Esperança"
-                className="w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                required
-              />
-            </div>
-
-            {/* WhatsApp */}
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">
-                WhatsApp (com DDD) *
-              </label>
-              <input
-                type="tel"
-                name="whatsapp"
-                value={form.whatsapp}
-                onChange={handleChange}
-                placeholder="Ex: 5511999999999"
-                className="w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                required
-              />
-            </div>
-
-            {/* Hours */}
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">
-                Horário de funcionamento *
-              </label>
-              <input
-                type="text"
-                name="hours"
-                value={form.hours}
-                onChange={handleChange}
-                placeholder="Ex: Seg a sáb, 7h às 19h"
-                className="w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                required
-              />
-            </div>
-
-            {/* AI Suggestion button */}
-            <div className="p-4 rounded-xl bg-primary/5 border border-primary/20">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-primary" />
-                  <span className="text-sm font-medium text-foreground">Sugestão da IA</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleAiSuggest}
-                  disabled={aiLoading}
-                  className="px-4 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
-                >
-                  {aiLoading ? "Gerando..." : "Gerar sugestão"}
-                </button>
-              </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                Selecione a categoria e clique para a IA sugerir uma descrição e oferta para seu negócio.
-              </p>
-            </div>
-
-            {/* Description */}
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">
-                Descrição curta
-              </label>
-              <textarea
-                name="description"
-                value={form.description}
-                onChange={handleChange}
-                placeholder="Descreva seu negócio em poucas palavras..."
-                rows={3}
-                className="w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
-              />
-            </div>
-
-            {/* Offer */}
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">
-                Oferta do dia
-              </label>
-              <input
-                type="text"
-                name="offer"
-                value={form.offer}
-                onChange={handleChange}
-                placeholder="Ex: Combo café + pão de queijo por R$ 9,90"
-                className="w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-              />
-            </div>
-
-            {/* Submit */}
             <button
-              type="submit"
-              className="w-full flex items-center justify-center gap-2 py-4 rounded-xl bg-primary text-primary-foreground font-semibold text-base hover:opacity-90 transition-opacity active:scale-[0.98] shadow-lg shadow-primary/20"
+              type="button"
+              onClick={handleAISuggestion}
+              disabled={generating}
+              className="px-4 py-2 rounded-lg bg-[#F59E0B] text-[#1C1917] text-xs font-semibold hover:bg-[#D97706] transition-colors disabled:opacity-50"
             >
-              <Store className="w-5 h-5" />
-              Criar minha vitrine grátis
+              {generating ? "Gerando..." : "Gerar"}
             </button>
-          </form>
-        </div>
+          </div>
+
+          {/* Description */}
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1.5">Descrição</label>
+            <textarea
+              value={form.description}
+              onChange={(e) => handleChange("description", e.target.value)}
+              placeholder="Conte sobre seu negócio..."
+              rows={3}
+              className="w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
+            />
+          </div>
+
+          {/* Offer */}
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1.5">Oferta em destaque</label>
+            <input
+              type="text"
+              value={form.offer}
+              onChange={(e) => handleChange("offer", e.target.value)}
+              placeholder="Ex: Café + pão de queijo por R$ 9,90"
+              className="w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+            />
+          </div>
+
+          {/* Security info */}
+          <div className="p-4 rounded-xl bg-accent/5 border border-accent/20 flex items-start gap-3">
+            <Shield className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
+            <div className="text-xs text-muted-foreground space-y-1">
+              <p className="font-medium text-foreground">Como funciona para o comerciante:</p>
+              <p>Cada transação é confirmada com código de 4 dígitos que você gera. Limite de 500 moedas/dia por cliente. Cooldown de 30 min entre transações no mesmo comércio.</p>
+            </div>
+          </div>
+
+          {/* Submit */}
+          <button
+            type="submit"
+            className="w-full py-4 rounded-xl bg-accent text-accent-foreground font-semibold text-base hover:opacity-90 transition-all active:scale-[0.98] shadow-lg shadow-accent/20"
+          >
+            Cadastrar meu comércio grátis
+          </button>
+        </form>
       </div>
 
       <Footer />

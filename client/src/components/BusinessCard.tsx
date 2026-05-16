@@ -1,16 +1,17 @@
 import { Link } from "wouter";
-import { MapPin, Clock, Tag, MessageCircle } from "lucide-react";
+import { MapPin, Clock, Coins, MessageCircle } from "lucide-react";
 import type { Business } from "@/data/businesses";
 import { categories } from "@/data/businesses";
 
 interface BusinessCardProps {
   business: Business;
+  distance?: string;
   index: number;
 }
 
-export default function BusinessCard({ business, index }: BusinessCardProps) {
+export default function BusinessCard({ business, distance, index }: BusinessCardProps) {
   const category = categories.find((c) => c.id === business.category);
-  const whatsappUrl = `https://wa.me/${business.whatsapp}?text=${encodeURIComponent("Olá, vi sua oferta no PertoZap e queria saber se ainda está disponível.")}`;
+  const whatsappUrl = `https://wa.me/${business.whatsapp}?text=${encodeURIComponent("Olá! Vi sua oferta no Moeda do Bairro e quero saber mais.")}`;
 
   return (
     <div
@@ -25,13 +26,16 @@ export default function BusinessCard({ business, index }: BusinessCardProps) {
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           loading="lazy"
         />
-        {/* Category badge */}
         <span className="absolute top-3 left-3 px-2 py-1 bg-white/90 backdrop-blur-sm rounded-md text-xs font-medium text-foreground">
           {category?.icon} {category?.label}
         </span>
-        {/* Offer tag */}
-        <span className="absolute bottom-3 left-3 right-3 px-2 py-1.5 bg-[#EAB308]/95 backdrop-blur-sm rounded-md text-xs font-semibold text-[#1C1917] flex items-center gap-1">
-          <Tag className="w-3 h-3" />
+        {/* Cashback badge */}
+        <span className="absolute top-3 right-3 px-2 py-1 bg-[#F59E0B]/95 backdrop-blur-sm rounded-md text-xs font-bold text-[#1C1917] flex items-center gap-1">
+          <Coins className="w-3 h-3" />
+          {business.cashbackRate} moedas/R$1
+        </span>
+        {/* Offer */}
+        <span className="absolute bottom-3 left-3 right-3 px-2 py-1.5 bg-[#1C1917]/80 backdrop-blur-sm rounded-md text-xs font-medium text-white truncate">
           {business.offer}
         </span>
       </div>
@@ -47,11 +51,10 @@ export default function BusinessCard({ business, index }: BusinessCardProps) {
           </p>
         </div>
 
-        {/* Meta */}
         <div className="flex items-center gap-3 text-xs text-muted-foreground">
           <span className="flex items-center gap-1">
             <MapPin className="w-3 h-3" />
-            {business.distance}
+            {distance || business.neighborhood}
           </span>
           <span className="flex items-center gap-1">
             <Clock className="w-3 h-3" />
@@ -59,7 +62,6 @@ export default function BusinessCard({ business, index }: BusinessCardProps) {
           </span>
         </div>
 
-        {/* Actions */}
         <div className="flex gap-2 pt-1">
           <Link
             href={`/negocios/${business.id}`}
